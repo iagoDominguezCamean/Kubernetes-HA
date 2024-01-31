@@ -13,7 +13,7 @@
     
     - name: Create .kube dir
       file:
-        path: /home/vagrant.kube
+        path: /home/vagrant/.kube
         state: directory
         mode: 0755
     
@@ -27,25 +27,27 @@
         mode: 0600
     
     - name: Enable keepalived
-      shell: systemctl enable --now keepalived
+      shell: systemctl enable keepalived
 
-    - name: Delete keealive.conf
+    - name: Delete keepalive.conf
       file:
         path: /etc/keepalived/keepalived.conf
         state: absent
 
     - name: Copy config file
       copy:
-        src: /vagrant/provisioning/keepalive.conf
-        dest: /etc/keealived/
+        src: /vagrant/provisioning/keepalived.conf
+        dest: /etc/keepalived/
+        remote_src: yes
     
     - name: Copy check_apiserver.sh
       copy:
         src: /vagrant/provisioning/check_apiserver.sh
         dest: /etc/keepalived/
+        remote_src: yes
 
     - name: Enable haproxy
-      shell: systemctl enable --now haproxy
+      shell: systemctl enable haproxy
 
     - name: Delete haproxy.cfg
       file:
@@ -56,7 +58,8 @@
       copy:
         src: /vagrant/provisioning/haproxy.cfg
         dest: /etc/haproxy/
-    
+        remote_src: yes
+
     - name: Restart keepalived
       shell: systemctl restart keepalived
     

@@ -97,6 +97,7 @@
         dest: /usr/bin/
         owner: vagrant
         group: vagrant
+        mode: 0755
     
     - name: Remove join command for ControlPlane
       file:
