@@ -107,9 +107,8 @@
       shell: kubeadm token create --print-join-command
       register: kube_join_cp
     
-
     - name: Generate new certificate-key
-      shell: kubeadm certs certificate-key
+      shell: kubeadm init phase upload-certs --upload-certs | grep -vw -e certificate -e Namespace
       register: cert_key
 
     - name: Print CP join command
