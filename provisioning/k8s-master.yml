@@ -1,0 +1,121 @@
+- hosts: masters
+  become: yes
+
+  tasks: 
+    - name: Enable keepalived
+      shell: systemctl enable keepalived
+
+    - name: Delete keepalive.conf
+      file:
+        path: /etc/keepalived/keepalived.conf
+        state: absent
+
+    - name: Copy config file
+      copy:
+        src: /vagrant/provisioning/keepalived.conf
+        dest: /etc/keepalived/
+        remote_src: yes
+    
+    - name: Copy check_apiserver.sh
+      copy:
+        src: /vagrant/provisioning/check_apiserver.sh
+        dest: /etc/keepalived/
+        remote_src: yes
+
+    - name: Enable haproxy
+      shell: systemctl enable haproxy
+
+    - name: Delete haproxy.cfg
+      file:
+        path: /etc/haproxy/haproxy.cfg
+        state: absent
+
+    - name: Copy haproxy.cfg
+      copy:
+        src: /vagrant/provisioning/haproxy.cfg
+        dest: /etc/haproxy/
+        remote_src: yes
+
+    - name: Restart keepalived
+      shell: systemctl restart keepalived
+    
+    - name: Restart haproxy
+      shell: systemctl restart haproxy
+      
+    - name: Iniciar el cluster con kubeadm
+      shell: kubeadm init --control-plane-endpoint {{ cluster_endpoint }} --apiserver-advertise-address="{{ master_ip }}" --pod-network-cidr="{{ pod_network }}" --upload-certs --ignore-preflight-errors=NumCPU
+
+    - name: Create .kube dir for vagrant user
+      file:
+        path: /home/vagrant/.kube
+        state: directory
+        mode: 0755
+    
+    - name: Copy admin.conf to user´s directory
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+        group: vagrant
+        mode: 0600
+
+    - name: Remove join command
+      file: 
+        path: /vagrant/provisioning/join-command.sh
+        state: absent
+    
+    - name: Generate new join command
+      shell: kubeadm token create --print-join-command
+      register: kube_join_cmd
+
+    - name: Copy command to local file
+      local_action: copy content="{{ kube_join_cmd.stdout_lines[0] }}" dest="/vagrant/provisioning/join-command.sh"
+
+    - name: Install dependencies for helm
+      dnf:
+        name: go
+        state: present
+
+    - name: Delete helm cloned dir
+      file:
+        path: /home/vagrant/helm
+        state: absent
+
+    - name: Download helm repo from git
+      git:
+        repo: https://github.com/helm/helm.git
+        dest: /home/vagrant/helm
+    
+    - name: Make helm
+      community.general.make:
+        chdir: /home/vagrant/helm
+    
+    - name: Copy helm binary into path dir
+      copy:
+        src: /home/vagrant/helm/bin/helm
+        dest: /usr/bin/
+        owner: vagrant
+        group: vagrant
+    
+    - name: Remove join command for ControlPlane
+      file:
+        path: /vagrant/provisioning/control_plane_join_command.sh
+        state: absent
+
+    - name: Generate join command for ControlPlane
+      shell: kubeadm token create --print-join-command
+      register: kube_join_cp
+    
+
+    - name: Generate new certificate-key
+      shell: kubeadm certs certificate-key
+      register: cert_key
+
+    - name: Print CP join command
+      debug:
+        msg: "{{ kube_join_cp.stdout_lines[0] }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU"
+      register: control_plane_join_command
+
+    - name: Copy the command to file
+      local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU" dest="/vagrant/provisioning/control_plane_join_command.sh"

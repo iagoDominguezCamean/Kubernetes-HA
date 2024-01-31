@@ -1,0 +1,65 @@
+- hosts: sec_masters
+  become: yes
+
+  tasks:
+
+    - name: Join cluster as ControlPlane node
+      shell: sh /vagrant/provisioning/control_plane_join_command.sh
+      register: join_or_not
+
+    - name: Print join command
+      debug:
+        var: join_or_not
+    
+    - name: Create .kube dir
+      file:
+        path: /home/vagrant.kube
+        state: directory
+        mode: 0755
+    
+    - name: Copy admin.conf
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+        group: vagrant
+        mode: 0600
+    
+    - name: Enable keepalived
+      shell: systemctl enable --now keepalived
+
+    - name: Delete keealive.conf
+      file:
+        path: /etc/keepalived/keepalived.conf
+        state: absent
+
+    - name: Copy config file
+      copy:
+        src: /vagrant/provisioning/keepalive.conf
+        dest: /etc/keealived/
+    
+    - name: Copy check_apiserver.sh
+      copy:
+        src: /vagrant/provisioning/check_apiserver.sh
+        dest: /etc/keepalived/
+
+    - name: Enable haproxy
+      shell: systemctl enable --now haproxy
+
+    - name: Delete haproxy.cfg
+      file:
+        path: /etc/haproxy/haproxy.cfg
+        state: absent
+
+    - name: Copy haproxy.cfg
+      copy:
+        src: /vagrant/provisioning/haproxy.cfg
+        dest: /etc/haproxy/
+    
+    - name: Restart keepalived
+      shell: systemctl restart keepalived
+    
+    - name: Restart haproxy
+      shell: systemctl restart haproxy
+

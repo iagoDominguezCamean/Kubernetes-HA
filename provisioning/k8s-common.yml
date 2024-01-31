@@ -1,0 +1,102 @@
+---
+- hosts: cluster
+  become: yes
+
+  tasks:
+    - name: Add master IP to known_hosts file
+      known_hosts:
+        path: /home/vagrant/.ssh/ssh_known_hosts
+        name: "{{ master_hostname }}"
+        key: "{{ lookup('pipe', 'ssh-keyscan -t rsa {{ master_hostname }}') }}"
+
+    - name: Add docker repo
+      ansible.builtin.shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install Docker and other dependencies
+      ansible.builtin.shell: yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin keepalived haproxy
+    
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+
+    - name: Remove default containerd file
+      file:
+        path: /etc/containerd/config.toml
+        state: absent
+      notify:
+        - restart containerd
+
+    - name: Create default containerd config.toml
+      ansible.builtin.shell: containerd config default | tee /etc/containerd/config.toml
+      
+    - name: Add vagrant user to docker group
+      user:
+        name: vagrant
+        group: docker
+      notify:
+        - restart docker
+    
+    - name: Remove swapfile from /etc/fstab
+      mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      loop:
+        - swap
+        - none
+
+    - name: Disable swap
+      shell: swapoff -a
+      when: ansible_swaptotal_mb > 0
+    
+    - name: Add an rpm signing key for k8s & repo
+      ansible.builtin.yum_repository:
+        name: k8s
+        description: Add K8s repo
+        gpgkey: https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+        baseurl: https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+        enabled: yes
+        gpgcheck: yes
+        state: present
+
+    - name: Install Kubernetes binaries
+      yum: 
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - kubelet 
+          - kubeadm 
+          - kubectl
+
+    - name: Reset Kubernetes cluster
+      shell: kubeadm reset -f
+
+    - name: Remove CNI configuration
+      file:
+        path: /etc/cni/net.d/10-flannel.conflist
+        state: absent
+
+    - name: Remove kube config file
+      file:
+        path: /home/vagrant/.kube/config
+        state: absent
+
+    - name: Reset iptables
+      shell: iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+    - name: Enable kubelet
+      shell: systemctl enable kubelet
+
+    - name: Disable firewalld
+      shell: systemctl disable firewalld
+
+    - name: Stop firewalld
+      shell: systemctl stop firewalld
+  handlers:
+    - name: restart docker
+      service: name=docker state=restarted
+
+    - name: restart containerd
+      service: name=containerd state=restarted

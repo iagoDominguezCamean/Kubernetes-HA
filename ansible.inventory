@@ -1,0 +1,12 @@
+[masters]
+idc-tfg-k8s-master
+[sec_masters]
+idc-tfg-k8s-master-2
+idc-tfg-k8s-master-3
+[workers]
+idc-tfg-k8s-worker-1
+idc-tfg-k8s-worker-2
+[cluster:children]
+masters
+sec_masters
+workers

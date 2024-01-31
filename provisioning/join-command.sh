@@ -1,0 +1,1 @@
+kubeadm join idc-cluster-endpoint:6443 --token aymbjh.t7j5ehwbldm9nne5 --discovery-token-ca-cert-hash sha256:ecfed857412c12066d6956f34a8a2e20d38813e4d60386439046f99d732df2dc 

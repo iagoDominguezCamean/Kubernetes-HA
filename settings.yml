@@ -1,0 +1,12 @@
+- settings:
+
+  master_cores:
+  master_mem:
+  
+  worker_cores:
+  worker_mem:
+  
+  pod_network:
+
+  master_hostname:
+  worker_hostname:

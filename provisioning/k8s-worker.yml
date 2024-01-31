@@ -1,0 +1,11 @@
+- hosts: workers
+  become: yes
+
+  tasks:
+    - name: Join cluster
+      shell: sh /vagrant/provisioning/join-command.sh
+      register: k8s_joined_or_not
+
+    - name: Print joined commmand
+      debug:
+        var: k8s_joined_or_not
