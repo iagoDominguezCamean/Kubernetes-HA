@@ -60,6 +60,10 @@
         group: vagrant
         mode: 0600
 
+    #- name: Install calico pod network
+    #  become: false
+    #  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+
     - name: Remove join command
       file: 
         path: /vagrant/provisioning/join-command.sh
@@ -118,4 +122,4 @@
       register: control_plane_join_command
 
     - name: Copy the command to file
-      local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU" dest="/vagrant/provisioning/control_plane_join_command.sh"
+      local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address {{ master_ip }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU --v=5" dest="/vagrant/provisioning/control_plane_join_command.sh"

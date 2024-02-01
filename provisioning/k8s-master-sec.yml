@@ -2,30 +2,6 @@
   become: yes
 
   tasks:
-
-    - name: Join cluster as ControlPlane node
-      shell: sh /vagrant/provisioning/control_plane_join_command.sh
-      register: join_or_not
-
-    - name: Print join command
-      debug:
-        var: join_or_not
-    
-    - name: Create .kube dir
-      file:
-        path: /home/vagrant/.kube
-        state: directory
-        mode: 0755
-    
-    - name: Copy admin.conf
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /home/vagrant/.kube/config
-        remote_src: yes
-        owner: vagrant
-        group: vagrant
-        mode: 0600
-    
     - name: Enable keepalived
       shell: systemctl enable keepalived
 
@@ -40,6 +16,12 @@
         dest: /etc/keepalived/
         remote_src: yes
     
+    - name: Change keepalived state
+      shell: sudo sed -i 's/state MASTER/state BACKUP/' /etc/keepalived/keepalived.conf
+
+    - name: Change keepalived priority
+      shell: sudo sed -i 's/priority 255/priority 254/' /etc/keepalived/keepalived.conf
+
     - name: Copy check_apiserver.sh
       copy:
         src: /vagrant/provisioning/check_apiserver.sh
@@ -66,3 +48,26 @@
     - name: Restart haproxy
       shell: systemctl restart haproxy
 
+
+    - name: Join cluster as ControlPlane node
+      shell: sh /vagrant/provisioning/control_plane_join_command.sh
+      register: join_or_not
+
+    - name: Print join command
+      debug:
+        var: join_or_not
+    
+    - name: Create .kube dir
+      file:
+        path: /home/vagrant/.kube
+        state: directory
+        mode: 0755
+    
+    - name: Copy admin.conf
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+        group: vagrant
+        mode: 0600
