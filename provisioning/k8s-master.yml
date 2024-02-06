@@ -60,9 +60,9 @@
         group: vagrant
         mode: 0600
 
-    #- name: Install calico pod network
-    #  become: false
-    #  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+    - name: Install calico pod network
+      become: false
+      shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
 
     - name: Remove join command
       file: 

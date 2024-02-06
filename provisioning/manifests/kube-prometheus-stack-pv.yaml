@@ -8,4 +8,4 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/etc/kubernetes/storage"
+    path: "/data/nfs"

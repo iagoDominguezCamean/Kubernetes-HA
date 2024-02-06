@@ -1,0 +1,64 @@
+- hosts: masters
+  become: yes
+
+  tasks:
+    # Only when NFS sever will use secondary hard drive
+    - name: Create partition and filesystem
+      community.general.parted:
+        device: /dev/sdb
+        label: gpt
+    
+    - name: Create primary partition
+      community.general.parted:
+        device: /dev/sdb
+        number: 1
+        state: present
+        align: optimal
+
+    - name: Verify partition alignment
+      shell: "parted -s -- /dev/sdb align-check optimal 1"
+
+    - name: Format partition to XFS
+      filesystem:
+        fstype: xfs
+        dev: /dev/sdb1
+
+    # This must do even without the secondary hard drive
+    - name: Create data dir
+      file:
+        path: /data
+        state: directory
+
+    - name: Add /dev/sdb1 to fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "/dev/sdb1 /data xfs defaults 0 0"
+    
+    - name: Mount partition
+      ansible.posix.mount:
+        path: /data
+        src: /dev/sdb1
+        fstype: xfs
+        opts: defaults
+        state: mounted
+    #
+
+    - name: Create directory to export
+      file:
+        path: /data/nfs
+        owner: nobody
+        group: nobody
+        mode: '2770'
+
+    # VirtualBox nodes local network 192.168.56.0/24
+    - name: Export directory
+      shell: echo -e "/data/nfs\t192.168.56.0/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+
+    - name: Exportfs
+      shell: exportfs -av
+
+    - name: Restart nfs-server
+      shell: systemctl restart nfs-server
+
+    - name: Add Helm Repository for nfs-subdir-external-provisioner
+      shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner

@@ -37,6 +37,7 @@ CLUSTER_IP_ADDR = CLUSTER_IP_ADDR.succ
 #LB_IP_ADDR = IPAddr.new CLUSTER_IP_ADDR
 #LB_IP_ADDR = CLUSTER_IP_ADDR.succ
 
+
 Vagrant.configure("2") do |config|
   
   config.vm.box = "generic/rocky8"
@@ -58,6 +59,17 @@ Vagrant.configure("2") do |config|
       prov.cpus = MASTER_CORES
       prov.memory = MASTER_MEMORY
 	    prov.gui = false
+      
+      disk = ".vagrant\\machines\\master\\nfsdsk.vmdk"
+      sataController = "SATA Controller"
+      
+      # Create the virtual disk if doesn't exist
+      unless File.exist?(disk)
+        prov.customize ["createmedium", "disk", "--filename", disk, "--format", "VMDK", "--size", 20480]
+      end
+
+      # Attach the virtual disk into the storage SAS controller
+      prov.customize ["storageattach", :id, "--storagectl", sataController, "--port", 1, "--device", 0, "--type", "hdd", "--medium", disk]
     end
 
     # Install and setup K8s using ansible

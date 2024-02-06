@@ -37,6 +37,11 @@
       notify:
         - restart docker
     
+    - name: Install nfs-utils
+      yum:
+        name: nfs-utils
+        state: present
+        
     - name: Remove swapfile from /etc/fstab
       mount:
         name: "{{ item }}"
