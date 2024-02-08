@@ -27,15 +27,10 @@ MASTER_MEMORY = 2048
 WORKER_MEMORY = 1024
 POD_NETWORK = "10.10.1.0/24"
 CLUSTER_ENDPOINT = "idc-cluster-endpoint:6443"
-LB_CORES = 1
-LB_MEMORY = 1024
-LB_IP = "192.168.56.50"
 
 require 'ipaddr'
 CLUSTER_IP_ADDR = IPAddr.new MASTER_IP
 CLUSTER_IP_ADDR = CLUSTER_IP_ADDR.succ
-#LB_IP_ADDR = IPAddr.new CLUSTER_IP_ADDR
-#LB_IP_ADDR = CLUSTER_IP_ADDR.succ
 
 
 Vagrant.configure("2") do |config|
@@ -55,7 +50,7 @@ Vagrant.configure("2") do |config|
     master.vm.network "private_network", ip: MASTER_IP
     
     master.vm.provider "virtualbox" do |prov|
-	    prov.name = "1TFG-#{master.vm.hostname}"
+	    prov.name = "TFG-#{master.vm.hostname}"
       prov.cpus = MASTER_CORES
       prov.memory = MASTER_MEMORY
 	    prov.gui = false
@@ -97,7 +92,7 @@ Vagrant.configure("2") do |config|
       masters.vm.network "private_network", ip: IP_ADDR
 
       masters.vm.provider "virtualbox" do |prov|
-        prov.name = "1TFG-#{masters.vm.hostname}"
+        prov.name = "TFG-#{masters.vm.hostname}"
         prov.cpus = MASTER_CORES
         prov.memory = MASTER_MEMORY
         prov.gui = false
@@ -114,26 +109,14 @@ Vagrant.configure("2") do |config|
       worker.vm.network "private_network", ip: IP_ADDR
         
       worker.vm.provider "virtualbox" do |prov|
-        prov.name = "1TFG-#{worker.vm.hostname}"
+        prov.name = "TFG-#{worker.vm.hostname}"
         prov.cpus = WORKER_CORES
         prov.memory = WORKER_MEMORY
         prov.gui = false
       end
     end
   end
-
-  # Load balancer
-  #config.vm.define "lb" do |lb|
-  #  lb.vm.hostname = "#{LB_HOSTNAME}"
-  #  lb.vm.network "private_network", ip: LB_IP
-
-  #  lb.vm.provider "virtualbox" do |prov|
-  #    prov.name = "TFG-#{lb.vm.hostname}"
-  #    prov.cpus = LB_CORES
-  #    prov.memory = LB_MEMORY
-  #    prov.gui = false
-  #  end
-  #end
+  
   # Global provisioning bash script
   config.vm.provision "shell", run: "once", path: "provisioning/bootstrap.sh"
 
