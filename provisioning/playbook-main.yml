@@ -4,3 +4,4 @@
 - import_playbook: k8s-master.yml
 - import_playbook: k8s-master-sec.yml
 - import_playbook: k8s-worker.yml
+- import_playbook: ansible/k8s-nfs-server.yml

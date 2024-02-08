@@ -2,10 +2,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: nfs-pvc
+  namespace: monitoring
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: nfs-client
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi

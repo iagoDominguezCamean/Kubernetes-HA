@@ -81,23 +81,28 @@
         name: go
         state: present
 
-    - name: Delete helm cloned dir
-      file:
-        path: /home/vagrant/helm
-        state: absent
+    #- name: Delete helm cloned dir
+    #  file:
+    #    path: /home/vagrant/helm
+    #    state: absent
 
-    - name: Download helm repo from git
-      git:
-        repo: https://github.com/helm/helm.git
-        dest: /home/vagrant/helm
+    #- name: Download helm repo from git
+    #  git:
+    #    repo: https://github.com/helm/helm.git
+    #    dest: /home/vagrant/helm
     
-    - name: Make helm
-      community.general.make:
-        chdir: /home/vagrant/helm
-    
+    #- name: Make helm
+    #  community.general.make:
+    #    chdir: /home/vagrant/helm
+    - name: Download helm
+      shell: wget https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
+
+    - name: Extract helm
+      shell: tar xvf helm-v3.14.0-linux-amd64.tar.gz
+      
     - name: Copy helm binary into path dir
       copy:
-        src: /home/vagrant/helm/bin/helm
+        src: /home/vagrant/linux-amd64/helm
         dest: /usr/bin/
         owner: vagrant
         group: vagrant

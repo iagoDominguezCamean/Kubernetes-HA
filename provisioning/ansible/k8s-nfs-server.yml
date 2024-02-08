@@ -3,6 +3,23 @@
 
   tasks:
     # Only when NFS sever will use secondary hard drive
+    #- name: Unmount partition
+    #  ansible.posix.mount:
+    #    path: /data
+    #    state: unmounted
+    
+    #- name: Delete /dev/sdb1 from fstab
+    #  lineinfile:
+    #    path: /etc/fstab
+    #    line: "/dev/sdb1 /data xfs defaults 0 0"
+    #    state: absent
+
+    #- name: Delete partition
+    #  community.general.parted:
+    #    device: /dev/sdb
+    #    number: 1
+    #    state: absent
+
     - name: Create partition and filesystem
       community.general.parted:
         device: /dev/sdb
@@ -14,6 +31,7 @@
         number: 1
         state: present
         align: optimal
+      ignore_errors: yes
 
     - name: Verify partition alignment
       shell: "parted -s -- /dev/sdb align-check optimal 1"
@@ -49,10 +67,13 @@
         owner: nobody
         group: nobody
         mode: '2770'
+        state: directory
 
     # VirtualBox nodes local network 192.168.56.0/24
     - name: Export directory
-      shell: echo -e "/data/nfs\t192.168.56.0/24(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+      lineinfile:
+        path: /etc/exports
+        line: "/data/nfs\t192.168.56.0/24(rw,sync,no_subtree_check,no_root_squash)"
 
     - name: Exportfs
       shell: exportfs -av
@@ -62,3 +83,20 @@
 
     - name: Add Helm Repository for nfs-subdir-external-provisioner
       shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+    - name: Add Helm Repository for prometheus
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Install nfs-subdir-external-provisioner
+      shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ master_ip }} --set nfs.path=/data/nfs --set storageClass.onDelete=true
+
+    - name: Create namespace monitoring
+      become: false
+      shell: kubectl create namespace monitoring
+      
+    - name: Apply kube-nfs-pvc
+      become: false
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
+
+    - name: Install prometheus
+      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
