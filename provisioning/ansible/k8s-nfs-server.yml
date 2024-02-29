@@ -82,21 +82,25 @@
       shell: systemctl restart nfs-server
 
     - name: Add Helm Repository for nfs-subdir-external-provisioner
+      become: false
       shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
 
     - name: Add Helm Repository for prometheus
+      become: false
       shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
     - name: Install nfs-subdir-external-provisioner
+      become: false
       shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ master_ip }} --set nfs.path=/data/nfs --set storageClass.onDelete=true
 
-    - name: Create namespace monitoring
-      become: false
-      shell: kubectl create namespace monitoring
+    #- name: Create namespace monitoring
+    #  become: false
+    #  shell: kubectl create namespace monitoring
       
     - name: Apply kube-nfs-pvc
       become: false
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
 
     - name: Install prometheus
-      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+      become: false
+      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
