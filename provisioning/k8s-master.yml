@@ -123,8 +123,8 @@
 
     - name: Print CP join command
       debug:
-        msg: "{{ kube_join_cp.stdout_lines[0] }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU"
+        msg: "{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address {{ ansible_eth1.ipv4.address }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU"
       register: control_plane_join_command
-
+      #$(ip a | grep -oP 'inet \K[\d.]+' | grep 192.168.56.1) <> {{ master_ip }}
     - name: Copy the command to file
-      local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address {{ master_ip }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU --v=5" dest="/vagrant/provisioning/control_plane_join_command.sh"
+      local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address $(ip a | grep -oP 'inet \K[\d.]+' | grep 192.168.56.1) --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU --v=5" dest="/vagrant/provisioning/control_plane_join_command.sh"

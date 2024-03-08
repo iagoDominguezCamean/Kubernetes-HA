@@ -101,6 +101,6 @@
       become: false
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
 
-    - name: Install prometheus
-      become: false
-      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+    #- name: Install prometheus
+    #  become: false
+    #  shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc

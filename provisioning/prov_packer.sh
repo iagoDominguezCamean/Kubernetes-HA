@@ -39,8 +39,8 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 sudo swapoff -a
 
 # SELinux as Permissive
- sudo setenforce 0
- sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 # Manage services
 sudo containerd config default | sudo tee /etc/containerd/config.toml
@@ -51,4 +51,4 @@ sudo systemctl restart docker
 sudo systemctl restart containerd
 
 # Add Cluster-endpoint IP
-sudo echo "192.168.56.50   idc-cluster-endpoint" >> /etc/hosts
+sudo echo "192.168.56.50   idc-cluster-endpoint" >> sudo /etc/hosts

@@ -19,6 +19,7 @@
       service:
         name: docker
         state: started
+        enabled: true
 
     - name: Remove default containerd file
       file:
@@ -29,6 +30,12 @@
 
     - name: Create default containerd config.toml
       ansible.builtin.shell: containerd config default | tee /etc/containerd/config.toml
+
+    - name: Edit config.toml
+      shell: sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+      
+    - name: Enable containerd
+      shell: systemctl enable containerd
       
     - name: Add vagrant user to docker group
       user:
