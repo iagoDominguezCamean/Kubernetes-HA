@@ -48,7 +48,12 @@
       yum:
         name: nfs-utils
         state: present
-        
+    
+    - name: Edit /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ nfs_server_ip }}\tnfs-server"
+
     - name: Remove swapfile from /etc/fstab
       mount:
         name: "{{ item }}"

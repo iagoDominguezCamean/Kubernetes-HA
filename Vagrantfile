@@ -1,9 +1,9 @@
-#require_relative 'provisioning/vbox.rb'
-#VBoxUtils.check_version('7.0.6')
-#Vagrant.require_version ">= 2.3.4"
+require_relative 'provisioning/vbox.rb'
+VBoxUtils.check_version('7.0.6')
+Vagrant.require_version ">= 2.3.4"
 
-#require 'yaml'
-#custom_settings = YAML.load_file('settings.yml')
+require 'yaml'
+custom_settings = YAML.load_file('settings.yml')
 
 class VagrantPlugins::ProviderVirtualBox::Action::Network
   def dhcp_server_matches_config?(dhcp_server, config)
@@ -18,15 +18,17 @@ WORKER_HOSTNAME = "idc-tfg-k8s-worker"
 LB_HOSTNAME = "idc-tfg-lb"
 
 # Cluster settings
-MASTER_IP = "192.168.56.10"
-MASTER_CORES = 1
-NUM_SEC_MASTERS = 2
-NUM_WORKERS = 2
-WORKER_CORES = 1
-MASTER_MEMORY = 2048
-WORKER_MEMORY = 1024
-POD_NETWORK = "10.10.1.0/24"
-CLUSTER_ENDPOINT = "idc-cluster-endpoint:6443"
+MASTER_IP = custom_settings['master_ip']
+MASTER_CORES = custom_settings['master_cores']
+NUM_SEC_MASTERS = custom_settings['num_sec_masters']
+NUM_WORKERS = custom_settings['num_workers']
+WORKER_CORES = custom_settings['worker_cores']
+MASTER_MEMORY = custom_settings['master_mem']
+WORKER_MEMORY = custom_settings['worker_mem']
+POD_NETWORK = custom_settings['pod_network']
+CLUSTER_ENDPOINT = custom_settings['cluster_endpoint']
+NFS_SERVER_IP = custom_settings['nfs_server_ip']
+NFS_SERVER_NET = custom_settings['nfs_server_net']
 
 require 'ipaddr'
 CLUSTER_IP_ADDR = IPAddr.new MASTER_IP
@@ -79,6 +81,8 @@ Vagrant.configure("2") do |config|
         master_hostname: MASTER_HOSTNAME,
         pod_network: POD_NETWORK,
         cluster_endpoint: CLUSTER_ENDPOINT,
+        nfs_server_ip: NFS_SERVER_IP,
+        nfs_server_net: NFS_SERVER_NET,
       }
     end
     

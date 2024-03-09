@@ -1,12 +1,14 @@
-- settings:
+master_cores: 1
+master_mem: 2048
+master_ip: "192.168.56.10"
 
-  master_cores:
-  master_mem:
-  
-  worker_cores:
-  worker_mem:
-  
-  pod_network:
+worker_cores: 1
+worker_mem: 2048
 
-  master_hostname:
-  worker_hostname:
+num_sec_masters: 2
+num_workers: 2
+
+pod_network: "10.10.1.0/24"
+cluster_endpoint: "idc-cluster-endpoint:6443"
+nfs_server_ip: 192.168.56.10
+nfs_server_net: 192.168.56.0/24
