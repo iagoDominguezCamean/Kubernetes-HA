@@ -14,7 +14,7 @@ vagrant plugin install vagrant-vbguest
 vagrant box add --name generic/rocky8 https://app.vagrantup.com/generic/boxes/rocky8/versions/4.1.20/providers/virtualbox/unknown/vagrant.box
 ````
 O especificar la versión en el vagrantfile
-````
+````rb
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/rocky8"
   config.vm.box_version = "4.1.20"
