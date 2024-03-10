@@ -10,7 +10,7 @@ vagrant plugin install vagrant-vbguest
 ````
 
 **Box generic/rocky8**: 4.1.20  
-````sh
+````bash
 vagrant box add --name generic/rocky8 https://app.vagrantup.com/generic/boxes/rocky8/versions/4.1.20/providers/virtualbox/unknown/vagrant.box
 ````
 O especificar la versión en el vagrantfile
