@@ -52,7 +52,7 @@
     - name: Edit /etc/hosts
       lineinfile:
         path: /etc/hosts
-        line: "{{ nfs_server_ip }}\tnfs-server"
+        line: "{{ nfs_server_ip }}\t{{ nfs_server_name }}"
 
     - name: Remove swapfile from /etc/fstab
       mount:

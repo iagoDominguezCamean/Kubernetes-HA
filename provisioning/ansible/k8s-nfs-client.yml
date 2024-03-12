@@ -3,12 +3,12 @@
 
   tasks:
     - name: Update exportfs list
-      shell: showmount --exports nfs-server
+      shell: showmount --exports {{ nfs_server_name }}
 
     - name: Mount NFS share
-      shell: mount -t nfs -o nfsvers=4 nfs-server:/data/nfs /mnt
+      shell: mount -t nfs -o nfsvers=4 {{ nfs_server_name }}:{{ nfs_server_path }} /mnt
 
     - name: Make it persistent
       lineinfile:
         path: /etc/fstab
-        line: nfs-server:/data/nfs  /mnt  nfs defaults  0 0
+        line: "{{ nfs_server_name }}:{{ nfs_server_path }}  /mnt  nfs defaults  0 0"

@@ -63,7 +63,7 @@
 
     - name: Create directory to export
       file:
-        path: /data/nfs
+        path: "{{ nfs_server_path }}"
         owner: nobody
         group: nobody
         mode: '2770'
@@ -73,7 +73,7 @@
     - name: Export directory
       lineinfile:
         path: /etc/exports
-        line: "/data/nfs\t192.168.56.0/24(rw,sync,no_subtree_check,no_root_squash)"
+        line: "{{ nfs_server_path }}\t{{ nfs_server_net }}(rw,sync,no_subtree_check,no_root_squash)"
 
     - name: Exportfs
       shell: exportfs -av
@@ -81,25 +81,25 @@
     - name: Restart nfs-server
       shell: systemctl restart nfs-server
 
-    - name: Add Helm Repository for nfs-subdir-external-provisioner
-      become: false
-      shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+    #- name: Add Helm Repository for nfs-subdir-external-provisioner
+    #  become: false
+    #  shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
 
-    - name: Add Helm Repository for prometheus
-      become: false
-      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    #- name: Add Helm Repository for prometheus
+    #  become: false
+    #  shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
-    - name: Install nfs-subdir-external-provisioner
-      become: false
-      shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ nfs_server_ip }} --set nfs.path=/data/nfs --set storageClass.onDelete=true
+    #- name: Install nfs-subdir-external-provisioner
+    #  become: false
+    #  shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ nfs_server_ip }} --set nfs.path={{ nfs_server_path }} --set storageClass.onDelete=true
 
     #- name: Create namespace monitoring
     #  become: false
     #  shell: kubectl create namespace monitoring
       
-    - name: Apply kube-nfs-pvc
-      become: false
-      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
+    #- name: Apply kube-nfs-pvc
+    #  become: false
+    #  shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
 
     #- name: Install prometheus
     #  become: false

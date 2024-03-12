@@ -6,3 +6,4 @@
 - import_playbook: k8s-worker.yml
 - import_playbook: ansible/k8s-nfs-server.yml
 - import_playbook: ansible/k8s-nfs-client.yml
+- import_playbook: ansible/k8s-deployment.yml

@@ -1,0 +1,21 @@
+- hosts: masters
+  become: false
+
+  tasks:
+    - name: Add Helm Repository for nfs-subdir-external-provisioner
+      shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+    - name: Install nfs-subdir-external-provisioner
+      shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ nfs_server_ip }} --set nfs.path={{ nfs_server_path }} --set storageClass.onDelete=true
+
+    - name: Apply kube-nfs-pvc
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
+
+    - name: Add Helm Repository for prometheus
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Install and deploy promethues
+      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+
+    - name: Install ingress controller
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
