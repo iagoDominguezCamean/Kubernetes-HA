@@ -29,6 +29,8 @@ POD_NETWORK = custom_settings['pod_network']
 CLUSTER_ENDPOINT = custom_settings['cluster_endpoint']
 NFS_SERVER_IP = custom_settings['nfs_server_ip']
 NFS_SERVER_NET = custom_settings['nfs_server_net']
+NFS_SERVER_NAME = custom_settings['nfs_server_name']
+NFS_SERVER_PATH = custom_settings['nfs_server_path']
 
 require 'ipaddr'
 CLUSTER_IP_ADDR = IPAddr.new MASTER_IP
@@ -83,6 +85,8 @@ Vagrant.configure("2") do |config|
         cluster_endpoint: CLUSTER_ENDPOINT,
         nfs_server_ip: NFS_SERVER_IP,
         nfs_server_net: NFS_SERVER_NET,
+        nfs_server_path: NFS_SERVER_PATH,
+        nfs_server_name: NFS_SERVER_NAME,
       }
     end
     

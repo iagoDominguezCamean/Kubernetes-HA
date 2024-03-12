@@ -10,5 +10,8 @@ num_workers: 2
 
 pod_network: "10.10.1.0/24"
 cluster_endpoint: "idc-cluster-endpoint:6443"
+
+nfs_server_name: "nfs-server"
+nfs_server_path: "/data/nfs"
 nfs_server_ip: 192.168.56.10
 nfs_server_net: 192.168.56.0/24
