@@ -13,9 +13,15 @@
 
     - name: Add Helm Repository for prometheus
       shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    
+    # Despliegue Baremetal para probar que funciona 
+    - name: Install ingress controller
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
+
+    # Used because laptop slow
+    - name: Wait for pods to initialize
+      pause:
+        minutes: 1
 
     - name: Install and deploy promethues
       shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
-
-    - name: Install ingress controller
-      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
