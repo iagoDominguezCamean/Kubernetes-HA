@@ -10,15 +10,15 @@ spec:
   - host: idctfg.k8s.es
     http:
       paths:
-      - path: "/grafana(/|$)(.*)"
-        pathType: Prefix
+      - path: /grafana
+        pathType: Exact
         backend:
           service:
             name: kube-prometheus-stack-grafana
             port:
               number: 80
-      - path: "/prometheus(/|$)(.*)"
-        pathType: Prefix
+      - path: /prometheus
+        pathType: Exact
         backend:
           service:
             name: kube-prometheus-stack-prometheus
