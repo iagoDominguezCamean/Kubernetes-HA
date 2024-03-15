@@ -21,7 +21,18 @@
     # Used because laptop slow
     - name: Wait for pods to initialize
       pause:
-        minutes: 1
+        seconds: 30
 
-    - name: Install and deploy promethues
-      shell: helm install -f /vagrant/provisioning/manifests/custom-values.yaml kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+    - name: Install and deploy prometheus
+      kubernetes.core.helm: #helm install -f /vagrant/provisioning/manifests/custom-values.yaml kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+        name: kube-prometheus-stack
+        namespace: default
+        chart_ref: prometheus-community/kube-prometheus-stack
+        atomic: true
+        set_values:
+          - value: alertmanager.persistentVolume.existingClaim=nfs-pvc
+          - value: server.persistentVolume.existingClaim=nfs-pvc
+          - value: grafana.persistentVolume.existingClaim=nfs-pvc
+
+    - name: Deploy ingress
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-ingress.yaml
