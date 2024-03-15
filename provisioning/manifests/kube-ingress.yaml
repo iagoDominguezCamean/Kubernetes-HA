@@ -11,14 +11,14 @@ spec:
     http:
       paths:
       - path: /grafana
-        pathType: Exact
+        pathType: Prefix
         backend:
           service:
             name: kube-prometheus-stack-grafana
             port:
               number: 80
       - path: /prometheus
-        pathType: Exact
+        pathType: Prefix
         backend:
           service:
             name: kube-prometheus-stack-prometheus
