@@ -1,9 +1,9 @@
 - hosts: cluster
 
-- import_playbook: k8s-common.yml
-- import_playbook: k8s-master.yml
-- import_playbook: k8s-master-sec.yml
-- import_playbook: k8s-worker.yml
+- import_playbook: ansible/k8s-common.yml
+- import_playbook: ansible/k8s-master.yml
+- import_playbook: ansible/k8s-master-sec.yml
+- import_playbook: ansible/k8s-worker.yml
 - import_playbook: ansible/k8s-nfs-server.yml
 - import_playbook: ansible/k8s-nfs-client.yml
 - import_playbook: ansible/k8s-deployment.yml
