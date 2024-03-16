@@ -14,17 +14,31 @@
     - name: Add Helm Repository for prometheus
       shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     
-    # Despliegue Baremetal para probar que funciona 
-    - name: Install ingress controller
-      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
+    - name: Prepate MetalLB installation
+      shell: "kubectl get configmap kube-proxy -n kube-system -o yaml | sed -e \"s/strictARP: false/strictARP: true/\" | kubectl apply -f - -n kube-system"
 
-    # Used because laptop slow
-    - name: Wait for pods to initialize
+    - name: Install MetalLB
+      shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+
+    # Despliegue Baremetal para probar que funciona 
+    #- name: Install ingress controller
+    #  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
+    - name: Install ingress-nginx controller
+      shell:  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
+
+    - name: Wait to avoid timeouts
       pause:
-        seconds: 30
+        minutes: 1
+
+    - name: Configurate metallb
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metallb.yaml
+
+    - name: Wait to avoid timeouts
+      pause:
+        minutes: 1
 
     - name: Install and deploy prometheus
-      kubernetes.core.helm: #helm install -f /vagrant/provisioning/manifests/custom-values.yaml kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+      kubernetes.core.helm:
         name: kube-prometheus-stack
         namespace: default
         chart_ref: prometheus-community/kube-prometheus-stack
