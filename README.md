@@ -21,6 +21,13 @@ Vagrant.configure("2") do |config|
 end
 ````
 Versiones posteriores no debería dar problemas.
+
+Modificar el /etc/hosts y asignarle lo siguiente
+````bash
+192.168.56.40 grafana.idctfg.k8s.es
+192.168.56.40 prometheus.idctfg.k8s.es
+````
+O los nombre de deminio que se especifiquen en **provisioning/manifests/kube-ingress.yaml**
 ## Ejecución
 
 ````

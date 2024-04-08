@@ -37,6 +37,9 @@
       pause:
         minutes: 1
 
+    - name: Deploy kube-metrics
+      shell: kubectl apply -f /vagrant/provisioning/manifests/components.yaml
+
     - name: Install and deploy prometheus
       kubernetes.core.helm:
         name: kube-prometheus-stack
