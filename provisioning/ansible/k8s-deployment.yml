@@ -38,7 +38,7 @@
         minutes: 1
 
     - name: Deploy kube-metrics
-      shell: kubectl apply -f /vagrant/provisioning/manifests/components.yaml
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metrics.yaml
 
     - name: Install and deploy prometheus
       kubernetes.core.helm:
