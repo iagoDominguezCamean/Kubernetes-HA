@@ -26,22 +26,18 @@
     - name: Install ingress-nginx controller
       shell:  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
 
-    - name: Wait to avoid timeouts
-      pause:
-        minutes: 1
-
     - name: Configurate metallb
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metallb.yaml
-
-    - name: Wait to avoid timeouts
-      pause:
-        minutes: 1
 
     - name: Deploy kube-metrics
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metrics.yaml
 
+    - name: Wait to avoid timeouts
+      pause:
+        minutes: 1
+
     - name: Install and deploy prometheus
-      kubernetes.core.helm:
+      kubernetes.core.helm: # helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
         name: kube-prometheus-stack
         namespace: default
         chart_ref: prometheus-community/kube-prometheus-stack
