@@ -1,0 +1,15 @@
+apiVersion: 1
+contactPoints:
+    - orgId: 1
+      name: Telegram notification
+      receivers:
+        - uid: edi7ktr57igoxe
+          type: telegram
+          settings:
+            bottoken: 6384189170:AAFMtiETK7eJ2MNixRikeEp1ePpRZir3ukY
+            chatid: "-1002050304401"
+            disable_notification: false
+            disable_web_page_preview: false
+            message_thread_id: "0"
+            protect_content: true
+          disableResolveMessage: false
