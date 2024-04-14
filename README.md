@@ -3,10 +3,12 @@
 **VirtualBox**: 7.0.6, ExtensionPack 7.0.6/7.0.12  
 **Vagrant**: 2.3.4  
 **Vagrant plugins**: vagrant-hostmanager, vagrant-vbguest  
+**Packer**: 1.10.2
 
 ````
 vagrant plugin install vagrant-hostmanager
 vagrant plugin install vagrant-vbguest
+packer plugins install github.com/hashicorp/vagrant
 ````
 
 **Box generic/rocky8**: 4.1.20  
@@ -21,6 +23,11 @@ Vagrant.configure("2") do |config|
 end
 ````
 Versiones posteriores no debería dar problemas.
+
+Para usar la box personalizada:
+````powershell
+packer build -force template.pkr.hcl
+````
 
 Modificar el /etc/hosts y asignarle lo siguiente
 ````bash
