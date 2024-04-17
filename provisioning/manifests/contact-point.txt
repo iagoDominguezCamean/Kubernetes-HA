@@ -1,0 +1,27 @@
+kubectl exec -it kube-prometheus-stack-grafana-7cf5785ff8-5bx98 -- curl -X POST \
+     -H "Authorization: Bearer glsa_gB4V5HpsHHUV7Qq365miKtvmqHid3Bw7_f6422f8b" \
+     -H "Content-Type: application/json" \
+     -d '{
+      "name": "Test telegram",
+      "type": "telegram",
+      "settings":{
+            "bottoken": "6384189170:AAFMtiETK7eJ2MNixRikeEp1ePpRZir3ukY",
+            "chatid": "-1002050304401",
+            "disable_notification": false,
+            "disable_web_page_preview": false,
+            "message_thread_id": "0",
+            "protect_content": true
+      }
+     }' \
+     http://localhost:3000/api/v1/provisioning/contact-points
+
+
+kubectl exec -it kube-prometheus-stack-grafana-7cf5785ff8-5bx98 -- curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic $(echo -n 'admin:prom-operator' | base64)" \
+  -d '{"name":"test", "role": "Admin"}' http://admin:admin@localhost:3000/api/serviceaccounts
+
+kubectl exec -it kube-prometheus-stack-grafana-7cf5785ff8-5bx98 -- curl -X POST \
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Basic $(echo -n 'admin:prom-operator' | base64)" \
+  -d '{"name":"test-token"}' http://admin:admin@localhost:3000/api/serviceaccounts/2/tokens
