@@ -1,16 +1,6 @@
 #!/bin/bash
 #sudo dnf -y update
 
-# Update kernel modules for GuestAdditions
-#sudo dnf install epel-release -y
-#sudo dnf install epel-release -y
-#sudo dnf install dkms kernel-devel kernel-headers gcc make bzip2 perl elfutils-libelf-deve
-# modprobe br_netfilter
-# sudo sysctl -w net.ipv4.ip_forward=1
-# en /etc/sysctl.conf o sudo sysctl net.bridge.bridge-nf-call-iptables=1
-# net.bridge.bridge-nf-call-ip6tables = 1
-# net.bridge.bridge-nf-call-iptables = 1
-
 # Install Docker
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -51,4 +41,7 @@ sudo systemctl restart docker
 sudo systemctl restart containerd
 
 # Add Cluster-endpoint IP
-sudo echo "192.168.56.50   idc-cluster-endpoint" >> sudo /etc/hosts
+sudo echo "192.168.56.30   idc-cluster-endpoint" >> sudo /etc/hosts
+
+# Install nfs-utils Keppalived Haproxy
+sudo yum install -y nfs-utils keepalived haproxy

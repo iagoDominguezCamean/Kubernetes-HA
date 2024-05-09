@@ -31,6 +31,8 @@ NFS_SERVER_IP = custom_settings['nfs_server_ip']
 NFS_SERVER_NET = custom_settings['nfs_server_net']
 NFS_SERVER_NAME = custom_settings['nfs_server_name']
 NFS_SERVER_PATH = custom_settings['nfs_server_path']
+CLUSTER_ENDPOINT_IP = custom_settings['cluster_endpoint_ip']
+CLUSTER_ENDPOINT_NAME = custom_settings['cluster_endpoint_name']
 
 require 'ipaddr'
 CLUSTER_IP_ADDR = IPAddr.new MASTER_IP
@@ -87,6 +89,8 @@ Vagrant.configure("2") do |config|
         nfs_server_net: NFS_SERVER_NET,
         nfs_server_path: NFS_SERVER_PATH,
         nfs_server_name: NFS_SERVER_NAME,
+        cluster_endpoint_ip: CLUSTER_ENDPOINT_IP,
+        cluster_endpoint_name: CLUSTER_ENDPOINT_NAME,
       }
     end
     

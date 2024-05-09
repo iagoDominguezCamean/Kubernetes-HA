@@ -111,6 +111,11 @@
 
     - name: Stop firewalld
       shell: systemctl stop firewalld
+
+    - name: Add cluster-endpoint ip to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ cluster_endpoint_ip }}\t{{ cluster_endpoint_name }}"
   handlers:
     - name: restart docker
       service: name=docker state=restarted

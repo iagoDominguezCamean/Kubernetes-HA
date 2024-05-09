@@ -43,4 +43,3 @@ sed -i "/-aisi/d" $USER_DIR/authorized_keys >& /dev/null
 cat $SSH_PUBLIC_KEY >> $USER_DIR/authorized_keys
 chown vagrant:vagrant $USER_DIR/authorized_keys
 chmod 0600 $USER_DIR/authorized_keys
-echo "192.168.56.30	idc-cluster-endpoint" >> /etc/hosts
