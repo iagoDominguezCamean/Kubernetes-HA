@@ -27,6 +27,7 @@ Versiones posteriores no debería dar problemas.
 Para usar la box personalizada:
 ````powershell
 packer build -force template.pkr.hcl
+vagrant box add --name NOMBRE directorio/salida/package.box
 ````
 
 Modificar el /etc/hosts y asignarle lo siguiente
