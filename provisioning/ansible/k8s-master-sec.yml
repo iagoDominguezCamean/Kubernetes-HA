@@ -51,11 +51,11 @@
 
     - name: Join cluster as ControlPlane node
       shell: sh /vagrant/provisioning/control_plane_join_command.sh
-      register: join_or_not
+      #register: join_or_not
 
-    - name: Print join command
-      debug:
-        var: join_or_not
+    #- name: Print join command
+     # debug:
+      #  var: join_or_not
     
     - name: Create .kube dir
       file:

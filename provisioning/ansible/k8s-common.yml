@@ -116,6 +116,13 @@
       lineinfile:
         path: /etc/hosts
         line: "{{ cluster_endpoint_ip }}\t{{ cluster_endpoint_name }}"
+
+    - name: Set SELinux to permissive
+      shell: setenforce 0
+
+    - name: Modify selinux config
+      shell: sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+      
   handlers:
     - name: restart docker
       service: name=docker state=restarted

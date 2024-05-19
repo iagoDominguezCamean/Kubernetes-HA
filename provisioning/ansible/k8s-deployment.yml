@@ -26,29 +26,28 @@
     - name: Install ingress-nginx controller
       shell:  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
     
-    - name: Wait to avoid timeouts
-      pause:
-        seconds: 20
-
-    - name: Configurate metallb
-      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metallb.yaml
-    
-    - name: Wait to avoid timeouts
-      pause:
-        seconds: 20
-
     - name: Deploy kube-metrics
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metrics.yaml
 
     - name: Wait to avoid timeouts
       pause:
-        minutes: 1
+        minutes: 5
+
+    - name: Configurate metallb
+      shell: kubectl apply -f /vagrant/provisioning/manifests/kube-metallb.yaml
+
+    - name: Wait to avoid timeouts
+      pause:
+        minutes: 2
 
     - name: Update helm repos
       shell: helm repo update
 
     - name: Install and deploy prometheus
       shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+
+    - name: Delete ingress-nginx-admission ValidatingWebhookConfiguration
+      shell: kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
 
     - name: Deploy ingress
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-ingress.yaml
