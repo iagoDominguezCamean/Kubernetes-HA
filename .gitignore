@@ -3,3 +3,4 @@ provisioning/control_plane_join_command.sh
 provisioning/id_rsa.pub
 .vagrant
 output*
+*.png
