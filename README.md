@@ -1,9 +1,11 @@
-## Requisitos
+## Requierements and Additional configuration
 
-**VirtualBox**: 7.0.6, ExtensionPack 7.0.6/7.0.12  
-**Vagrant**: 2.3.4  
+**VirtualBox**: 7.0.6, ExtensionPack 7.0.6 >=   
+**Vagrant**: 2.3.4   
 **Vagrant plugins**: vagrant-hostmanager, vagrant-vbguest  
-**Packer**: 1.10.2
+**Packer**: 1.10.2 >=
+
+**Newer version should work without problems**
 
 ````
 vagrant plugin install vagrant-hostmanager
@@ -15,28 +17,29 @@ packer plugins install github.com/hashicorp/vagrant
 ````powershell
 vagrant box add --name generic/rocky8 https://app.vagrantup.com/generic/boxes/rocky8/versions/4.1.20/providers/virtualbox/unknown/vagrant.box
 ````
-O especificar la versión en el vagrantfile
+OR
 ````rb
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/rocky8"
   config.vm.box_version = "4.1.20"
 end
 ````
-Versiones posteriores no debería dar problemas.
 
-Para usar la box personalizada:
+### Packer 
+Add the custom box to Vagrant:
 ````powershell
 packer build -force template.pkr.hcl
 vagrant box add --name NOMBRE directorio/salida/package.box
 ````
 
-Modificar el /etc/hosts y asignarle lo siguiente
+### Hostname resolution
+Add to /etc/hosts (C:\Windows\System32\drivers\etc) the following:
 ````bash
 192.168.56.40 grafana.idctfg.k8s.es
 192.168.56.40 prometheus.idctfg.k8s.es
 ````
-O los nombre de deminio que se especifiquen en **provisioning/manifests/kube-ingress.yaml**
-## Ejecución
+IP address must be the one asigned to ingress-nginx-controller via metallb. Hostname  must the same as the specified in **provisioning/manifests/kube-ingress.yaml** .
+## Execution
 
 ````
 vagrant up --provision-with shell
