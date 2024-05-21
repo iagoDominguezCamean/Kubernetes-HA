@@ -34,6 +34,7 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 # Manage services
 sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 sudo kubeadm config images pull
 sudo systemctl enable kubelet
 sudo systemctl disable firewalld
