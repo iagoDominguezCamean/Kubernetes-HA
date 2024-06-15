@@ -2,24 +2,6 @@
   become: yes
 
   tasks:
-    # Only when NFS sever will use secondary hard drive
-    #- name: Unmount partition
-    #  ansible.posix.mount:
-    #    path: /data
-    #    state: unmounted
-    
-    #- name: Delete /dev/sdb1 from fstab
-    #  lineinfile:
-    #    path: /etc/fstab
-    #    line: "/dev/sdb1 /data xfs defaults 0 0"
-    #    state: absent
-
-    #- name: Delete partition
-    #  community.general.parted:
-    #    device: /dev/sdb
-    #    number: 1
-    #    state: absent
-
     - name: Create partition and filesystem
       community.general.parted:
         device: /dev/sdb
@@ -35,13 +17,17 @@
 
     - name: Verify partition alignment
       shell: "parted -s -- /dev/sdb align-check optimal 1"
+      register: parted_result
+
+    - name: Print parted check
+      debug:
+        var: parted_result
 
     - name: Format partition to XFS
       filesystem:
         fstype: xfs
         dev: /dev/sdb1
 
-    # This must do even without the secondary hard drive
     - name: Create data dir
       file:
         path: /data
@@ -59,7 +45,6 @@
         fstype: xfs
         opts: defaults
         state: mounted
-    #
 
     - name: Create directory to export
       file:
@@ -69,7 +54,6 @@
         mode: '2770'
         state: directory
 
-    # VirtualBox nodes local network 192.168.56.0/24
     - name: Export directory
       lineinfile:
         path: /etc/exports
@@ -79,4 +63,18 @@
       shell: exportfs -av
 
     - name: Restart nfs-server
-      shell: systemctl restart nfs-server
+      service:
+        name: nfs-server
+        state: restarted
+      #shell: systemctl restart nfs-server
+
+    - name: Enable nfs-server
+      service:
+        name: nfs-server
+        enabled: true
+
+    - name: Enable rpcbind
+      service:
+        name: rpcbind
+        enabled: true
+      #shell: systemctl enable nfs-server rpcbind
