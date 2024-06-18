@@ -3,16 +3,31 @@
 
   tasks:
     - name: Add Helm Repository for nfs-subdir-external-provisioner
-      shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      kubernetes.core.helm_repository:
+        name: nfs-subdir-external-provisioner
+        repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      #shell: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
 
     - name: Install nfs-subdir-external-provisioner
-      shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ nfs_server_ip }} --set nfs.path={{ nfs_server_path }} --set storageClass.onDelete=true
+      kubernetes.core.helm: 
+        name: nfs-subdir-external-provisioner
+        namespace: default
+        chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+        atomic: true
+        set_values:
+          - value: nfs.server={{ nfs_server_ip }}
+          - value: nfs.path={{ nfs_server_path }}
+          - value: storageClass.onDelete=true
+      #shell: helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server={{ nfs_server_ip }} --set nfs.path={{ nfs_server_path }} --set storageClass.onDelete=true
 
     - name: Apply kube-nfs-pvc
       shell: kubectl apply -f /vagrant/provisioning/manifests/kube-nfs-pvc.yaml
 
     - name: Add Helm Repository for prometheus
-      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      kubernetes.core.helm_repository:
+        name: prometheus-community
+        repo_url: https://prometheus-community.github.io/helm-charts
+      #shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     
     - name: Prepate MetalLB installation
       shell: "kubectl get configmap kube-proxy -n kube-system -o yaml | sed -e \"s/strictARP: false/strictARP: true/\" | kubectl apply -f - -n kube-system"
@@ -20,9 +35,6 @@
     - name: Install MetalLB
       shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
 
-    # Despliegue Baremetal para probar que funciona 
-    #- name: Install ingress controller
-    #  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/baremetal/deploy.yaml
     - name: Install ingress-nginx controller
       shell:  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
     
@@ -44,7 +56,16 @@
       shell: helm repo update
 
     - name: Install and deploy prometheus
-      shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
+      kubernetes.core.helm: 
+        name: kube-prometheus-stack
+        namespace: default
+        chart_ref: prometheus-community/kube-prometheus-stack
+        atomic: true
+        set_values:
+          - value: alertmanager.persistentVolume.existingClaim=nfs-pvc
+          - value: server.persistentVolume.existingClaim=nfs-pvc
+          - value: grafana.persistentVolume.existingClaim=nfs-pvc
+      #shell: helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --set=alertmanager.persistentVolume.existingClaim=nfs-pvc,server.persistentVolume.existingClaim=nfs-pvc,grafana.persistentVolume.existingClaim=nfs-pvc
 
     - name: Delete ingress-nginx-admission ValidatingWebhookConfiguration
       shell: kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission

@@ -3,7 +3,9 @@
 
   tasks:
     - name: Enable keepalived
-      shell: systemctl enable keepalived
+      systemd_service:
+        name: keepalived
+        enabled: true
 
     - name: Delete keepalive.conf
       file:
@@ -20,7 +22,7 @@
       shell: sudo sed -i 's/state MASTER/state BACKUP/' /etc/keepalived/keepalived.conf
 
     - name: Change keepalived priority
-      shell: sudo sed -i 's/priority 255/priority 254/' /etc/keepalived/keepalived.conf
+      shell: sudo sed -i 's/priority 150/priority 100/' /etc/keepalived/keepalived.conf
 
     - name: Copy check_apiserver.sh
       copy:
@@ -29,7 +31,9 @@
         remote_src: yes
 
     - name: Enable haproxy
-      shell: systemctl enable haproxy
+      systemd_service:
+        name: haproxy
+        enabled: true
 
     - name: Delete haproxy.cfg
       file:
@@ -43,19 +47,19 @@
         remote_src: yes
 
     - name: Restart keepalived
-      shell: systemctl restart keepalived
+      service:
+        name: keepalived
+        state: restarted
+      #shell: systemctl restart keepalived
     
     - name: Restart haproxy
-      shell: systemctl restart haproxy
-
+      service:
+        name: haproxy
+        state: restarted
+      #shell: systemctl restart haproxy
 
     - name: Join cluster as ControlPlane node
       shell: sh /vagrant/provisioning/control_plane_join_command.sh
-      #register: join_or_not
-
-    #- name: Print join command
-     # debug:
-      #  var: join_or_not
     
     - name: Create .kube dir
       file:

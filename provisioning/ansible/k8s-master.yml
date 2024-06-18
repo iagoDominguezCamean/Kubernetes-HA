@@ -3,7 +3,9 @@
 
   tasks: 
     - name: Enable keepalived
-      shell: systemctl enable keepalived
+      systemd_service:
+        name: keepalived
+        enabled: true
 
     - name: Delete keepalive.conf
       file:
@@ -23,7 +25,9 @@
         remote_src: yes
 
     - name: Enable haproxy
-      shell: systemctl enable haproxy
+      systemd_service:
+        name: haproxy
+        enabled: true
 
     - name: Delete haproxy.cfg
       file:
@@ -37,10 +41,16 @@
         remote_src: yes
 
     - name: Restart keepalived
-      shell: systemctl restart keepalived
+      service:
+        name: keepalived
+        state: restarted
+      #shell: systemctl restart keepalived
     
     - name: Restart haproxy
-      shell: systemctl restart haproxy
+      service:
+        name: haproxy
+        state: restarted
+      #shell: systemctl restart haproxy
       
     - name: Iniciar el cluster con kubeadm
       shell: kubeadm init --control-plane-endpoint {{ cluster_endpoint }} --apiserver-advertise-address="{{ master_ip }}" --pod-network-cidr="{{ pod_network }}" --upload-certs --ignore-preflight-errors=NumCPU
@@ -60,9 +70,17 @@
         group: vagrant
         mode: 0600
 
+    - name: Install kubernetes module for python
+      pip:
+        name: kubernetes
+        executable: pip3
+
     - name: Install calico pod network
       become: false
-      shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+      kubernetes.core.k8s:
+        state: present
+        src: https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+      #shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
 
     - name: Remove join command
       file: 
@@ -81,24 +99,18 @@
         name: go
         state: present
 
-    #- name: Delete helm cloned dir
-    #  file:
-    #    path: /home/vagrant/helm
-    #    state: absent
-
-    #- name: Download helm repo from git
-    #  git:
-    #    repo: https://github.com/helm/helm.git
-    #    dest: /home/vagrant/helm
-    
-    #- name: Make helm
-    #  community.general.make:
-    #    chdir: /home/vagrant/helm
     - name: Download helm
-      shell: wget https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
+      ansible.builtin.get_url:
+        dest: /home/vagrant/
+        url: https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
+      #shell: wget https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
 
     - name: Extract helm
-      shell: tar xvf helm-v3.14.0-linux-amd64.tar.gz
+      ansible.builtin.unarchive:
+        src: /home/vagrant/helm-v3.14.0-linux-amd64.tar.gz
+        dest: /home/vagrant
+        mode: 0755
+      #shell: tar xvf helm-v3.14.0-linux-amd64.tar.gz
       
     - name: Copy helm binary into path dir
       copy:
@@ -125,6 +137,6 @@
       debug:
         msg: "{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address {{ ansible_eth1.ipv4.address }} --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU"
       register: control_plane_join_command
-      #$(ip a | grep -oP 'inet \K[\d.]+' | grep 192.168.56.1) <> {{ master_ip }}
+
     - name: Copy the command to file
       local_action: copy content="{{ kube_join_cp.stdout_lines[0] }} --apiserver-advertise-address $(ip a | grep -oP 'inet \K[\d.]+' | grep 192.168.56.1) --control-plane --certificate-key {{ cert_key.stdout_lines[0] }} --ignore-preflight-errors=NumCPU --v=5" dest="/vagrant/provisioning/control_plane_join_command.sh"

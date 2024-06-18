@@ -13,7 +13,19 @@
       ansible.builtin.shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
     - name: Install Docker and other dependencies
-      ansible.builtin.shell: yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin keepalived haproxy
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - keepalived
+          - haproxy
+      #ansible.builtin.shell: yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin keepalived haproxy
     
     - name: Start Docker
       service:
@@ -29,13 +41,17 @@
         - restart containerd
 
     - name: Create default containerd config.toml
-      ansible.builtin.shell: containerd config default | tee /etc/containerd/config.toml
+      shell: containerd config default | tee /etc/containerd/config.toml
 
     - name: Edit config.toml
       shell: sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
       
     - name: Enable containerd
-      shell: systemctl enable containerd
+      service:
+        name: containerd
+        state: started
+        enabled: true
+      #shell: systemctl enable containerd
       
     - name: Add vagrant user to docker group
       user:
@@ -107,10 +123,14 @@
       shell: systemctl enable kubelet
 
     - name: Disable firewalld
-      shell: systemctl disable firewalld
+      systemd_service:
+        enabled: false
+        name: firewalld
+        state: stopped
+      #shell: systemctl disable firewalld
 
-    - name: Stop firewalld
-      shell: systemctl stop firewalld
+    #- name: Stop firewalld
+    #  shell: systemctl stop firewalld
 
     - name: Add cluster-endpoint ip to /etc/hosts
       lineinfile:
@@ -118,10 +138,13 @@
         line: "{{ cluster_endpoint_ip }}\t{{ cluster_endpoint_name }}"
 
     - name: Set SELinux to permissive
-      shell: setenforce 0
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+      #shell: setenforce 0
 
-    - name: Modify selinux config
-      shell: sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+    #- name: Modify selinux config
+     # shell: sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
       
   handlers:
     - name: restart docker

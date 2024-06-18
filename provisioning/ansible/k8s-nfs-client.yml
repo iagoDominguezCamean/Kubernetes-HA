@@ -4,11 +4,21 @@
   tasks:
     - name: Update exportfs list
       shell: showmount --exports {{ nfs_server_name }}
+      register: showmount_result
+
+    - name: Print NFS exports
+      debug:
+        var: showmount_result.stdout
 
     - name: Mount NFS share
-      shell: mount -t nfs -o nfsvers=4 {{ nfs_server_name }}:{{ nfs_server_path }} /mnt
+      ansible.posix.mount:
+        path: /mnt
+        state: mounted
+        src: "{{ nfs_server_name }}:{{ nfs_server_path}}"
+        fstype: nfs
+      #shell: mount -t nfs -o nfsvers=4 {{ nfs_server_name }}:{{ nfs_server_path }} /mnt
 
-    - name: Make it persistent
-      lineinfile:
-        path: /etc/fstab
-        line: "{{ nfs_server_name }}:{{ nfs_server_path }}  /mnt  nfs defaults  0 0"
+    #- name: Make it persistent
+    #  lineinfile:
+    #    path: /etc/fstab
+    #    line: "{{ nfs_server_name }}:{{ nfs_server_path }}  /mnt  nfs defaults  0 0"
